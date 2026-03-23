@@ -1,6 +1,18 @@
 function [e, aec] = aec_process(aec, x, ref)
 %AEC_PROCESS Frame NLMS AEC with frame-level DTD gating.
 
+if ~aec.enabled || strcmpi(aec.algorithm, 'off') || strcmpi(aec.algorithm, 'bypass')
+	aec.dtd_active = false;
+	aec.erle_inst_db = NaN;
+	aec.erle_window_db = NaN;
+	e = x;
+	return;
+end
+
+if ~strcmpi(aec.algorithm, 'nlms')
+	error('aec_process:UnsupportedAlgorithm', 'Unsupported AEC algorithm: %s', aec.algorithm);
+end
+
 % Frame-level DTD estimate.
 aec.dtd_active = dtd_compute(x, ref, aec.dtd_threshold_lin);
 

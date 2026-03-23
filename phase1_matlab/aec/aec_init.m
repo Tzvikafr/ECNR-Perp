@@ -1,6 +1,8 @@
 function aec = aec_init(cfg)
 %AEC_INIT Initialize simplified NLMS AEC state.
 
+aec.enabled = cfg.aec.enabled;
+aec.algorithm = cfg.aec.algorithm;
 aec.filter_length = cfg.aec.filter_length;
 aec.step_size = cfg.aec.step_size;
 aec.regularization = cfg.aec.regularization;

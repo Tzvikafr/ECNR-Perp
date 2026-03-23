@@ -8,9 +8,12 @@
   },
   "beamformer": {
     "enabled": true,
+    "algorithm": "das",
     "type": "DAS"
   },
   "aec": {
+    "enabled": true,
+    "algorithm": "nlms",
     "filter_length": 128,
     "step_size": 0.1,
     "regularization": 1e-6,
@@ -23,6 +26,7 @@
   },
   "nr": {
     "enabled": true,
+    "algorithm": "traditional",
     "mode": "traditional",
     "aggressiveness_db": 8
   }

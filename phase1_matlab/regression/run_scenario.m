@@ -14,7 +14,12 @@ addpath(genpath(fullfile(rootDir, 'nr')));
 addpath(genpath(fullfile(rootDir, 'metrics')));
 addpath(genpath(fullfile(rootDir, 'io')));
 
-inputObj = jsondecode(fileread(inputPath));
+if isstruct(inputPath)
+	inputObj = inputPath;
+	inputPath = '';
+else
+	inputObj = jsondecode(fileread(inputPath));
+end
 
 if isfield(inputObj, 'scenarios')
 	error('run_scenario:InvalidInput', 'Input appears to be a suite file. Use run_regression_suite.');
@@ -22,11 +27,14 @@ end
 
 if isfield(inputObj, 'config') && isfield(inputObj, 'mic_wav')
 	scenario = inputObj;
-	configPath = fullfile(workspaceRoot, scenario.config);
-	micPath = fullfile(workspaceRoot, scenario.mic_wav);
+	if ~isfield(scenario, 'name')
+		scenario.name = 'inline_scenario';
+	end
+	configPath = resolve_input_path(workspaceRoot, scenario.config);
+	micPath = resolve_input_path(workspaceRoot, scenario.mic_wav);
 	refPath = '';
 	if isfield(scenario, 'ref_wav')
-		refPath = fullfile(workspaceRoot, scenario.ref_wav);
+		refPath = resolve_input_path(workspaceRoot, scenario.ref_wav);
 	end
 else
 	% Backward-compatible synthetic mode when a config path is provided.
@@ -39,10 +47,7 @@ end
 cfg = ecnr_load_config(configPath);
 
 if isfield(opts, 'param_overrides') && isstruct(opts.param_overrides)
-	keys = fieldnames(opts.param_overrides);
-	for i = 1:numel(keys)
-		cfg = set_struct_field(cfg, keys{i}, opts.param_overrides.(keys{i}));
-	end
+	cfg = apply_overrides(cfg, opts.param_overrides);
 end
 
 state = ecnr_init(cfg);
@@ -74,8 +79,20 @@ if frameCount < 1
 end
 
 yAll = zeros(frameCount * N, 1);
-records = repmat(struct('erle_db', NaN, 'erle_inst_db', NaN, 'erle_window_db', NaN, ...
-	'snr_in_db', NaN, 'snr_out_db', NaN, 'dtd_active', false, 'frame_index', uint64(0)), frameCount, 1);
+records = repmat(struct( ...
+	'erle_db', NaN, ...
+	'erle_inst_db', NaN, ...
+	'erle_window_db', NaN, ...
+	'snr_in_db', NaN, ...
+	'snr_out_db', NaN, ...
+	'dtd_active', false, ...
+	'frame_index', uint64(0), ...
+	'beamformer_enabled', false, ...
+	'beamformer_algorithm', "", ...
+	'aec_enabled', false, ...
+	'aec_algorithm', "", ...
+	'nr_enabled', false, ...
+	'nr_algorithm', ""), frameCount, 1);
 
 for k = 1:frameCount
 	idx = (k-1)*N + (1:N);
@@ -127,4 +144,39 @@ if ~isfield(s, head) || ~isstruct(s.(head))
 	s.(head) = struct();
 end
 s.(head) = set_struct_field(s.(head), tail, value);
+end
+
+function s = apply_overrides(s, overrides)
+keys = fieldnames(overrides);
+for i = 1:numel(keys)
+	key = keys{i};
+	value = overrides.(key);
+	if contains(key, '.')
+		s = set_struct_field(s, key, value);
+	elseif isstruct(value)
+		if ~isfield(s, key) || ~isstruct(s.(key))
+			s.(key) = struct();
+		end
+		s.(key) = apply_overrides(s.(key), value);
+	else
+		s.(key) = value;
+	end
+end
+end
+
+function p = resolve_input_path(workspaceRoot, rawPath)
+if isempty(rawPath)
+	p = '';
+	return;
+end
+
+if isstring(rawPath)
+	rawPath = char(rawPath);
+end
+
+if isfile(rawPath)
+	p = rawPath;
+else
+	p = fullfile(workspaceRoot, rawPath);
+end
 end

@@ -62,6 +62,43 @@ if ~isfield(cfg.reference, 'delay_compensation_samples')
     cfg.reference.delay_compensation_samples = 0;
 end
 
+if ~isfield(cfg.beamformer, 'enabled')
+    cfg.beamformer.enabled = cfg.mic_count > 1;
+end
+if isfield(cfg.beamformer, 'algorithm')
+    cfg.beamformer.algorithm = lower(string(cfg.beamformer.algorithm));
+elseif isfield(cfg.beamformer, 'type')
+    cfg.beamformer.algorithm = lower(string(cfg.beamformer.type));
+else
+    cfg.beamformer.algorithm = "das";
+end
+
+if ~isfield(cfg, 'aec') || ~isstruct(cfg.aec)
+    cfg.aec = struct();
+end
+if ~isfield(cfg.aec, 'enabled')
+    cfg.aec.enabled = true;
+end
+if ~isfield(cfg.aec, 'algorithm')
+    cfg.aec.algorithm = "nlms";
+else
+    cfg.aec.algorithm = lower(string(cfg.aec.algorithm));
+end
+
+if ~isfield(cfg, 'nr') || ~isstruct(cfg.nr)
+    cfg.nr = struct();
+end
+if ~isfield(cfg.nr, 'enabled')
+    cfg.nr.enabled = true;
+end
+if isfield(cfg.nr, 'algorithm')
+    cfg.nr.algorithm = lower(string(cfg.nr.algorithm));
+elseif isfield(cfg.nr, 'mode')
+    cfg.nr.algorithm = lower(string(cfg.nr.mode));
+else
+    cfg.nr.algorithm = "traditional";
+end
+
 % Normalize mode for top-level pipeline convenience.
 if isfield(cfg.nr, 'mode')
     cfg.mode = cfg.nr.mode;
@@ -71,4 +108,10 @@ else
     cfg.mode = 'traditional';
     cfg.nr.mode = 'traditional';
 end
+
+cfg.mode = char(lower(string(cfg.mode)));
+cfg.nr.mode = char(lower(string(cfg.nr.mode)));
+cfg.beamformer.algorithm = char(cfg.beamformer.algorithm);
+cfg.aec.algorithm = char(cfg.aec.algorithm);
+cfg.nr.algorithm = char(cfg.nr.algorithm);
 end

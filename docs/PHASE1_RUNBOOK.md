@@ -42,10 +42,32 @@ ecnr_gui_launch();
 ```
 
 GUI capabilities:
-- Scenario selection
-- Hot parameter tuning: AEC step size, NR aggressiveness
-- Run offline scenario
-- View waveform and ERLE trend
+- Input mode selection: Scenario JSON or Direct WAV
+- File pickers for scenario, base config, mic WAV, reference WAV, output WAV, and metrics CSV
+- Module enable and algorithm selection:
+	- Beamformer: Off / DAS
+	- AEC: Bypass / NLMS
+	- NR: Bypass / Traditional / Hybrid placeholder
+- Tuning controls for current Phase 1 parameters
+- Explicit `Reinitialize` flow for restart-required controls
+- Metrics panel, summary table, run history, waveform plot, ERLE trend, SNR/DTD trend
+- CSV export for the latest run
+
+Restart-required controls:
+- sample rate
+- frame size
+- mic count
+- AEC filter length
+- ERLE window frames
+- algorithm selections
+
+Hot-update controls:
+- module enable flags
+- reference delay
+- AEC step size
+- AEC regularization
+- DTD threshold
+- NR aggressiveness
 
 ## 4) Smoke test
 

@@ -21,6 +21,12 @@ end
 [y, state.nr] = nr_trad_process(state.nr, e);
 
 [state.metrics, rec] = metrics_update(state.metrics, x, e, y, state.aec.dtd_active, state.aec);
+rec.beamformer_enabled = logical(state.beamformer.enabled);
+rec.beamformer_algorithm = string(state.beamformer.algorithm);
+rec.aec_enabled = logical(state.aec.enabled);
+rec.aec_algorithm = string(state.aec.algorithm);
+rec.nr_enabled = logical(state.nr.enabled);
+rec.nr_algorithm = string(state.nr.algorithm);
 state.last_metrics = rec;
 
 state.frame_index = state.frame_index + 1;
