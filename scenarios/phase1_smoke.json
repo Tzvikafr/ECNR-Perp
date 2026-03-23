@@ -1,0 +1,5 @@
+{
+  "name": "phase1_smoke",
+  "config": "configs/phase1_default.json",
+  "description": "Synthetic single-frame offline smoke scenario"
+}

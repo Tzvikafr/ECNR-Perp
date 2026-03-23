@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "sample_rate_hz": 16000,
+  "mic_count": 2,
+  "frame": {
+    "length_ms": 20,
+    "length_samples": 320
+  },
+  "beamformer": {
+    "enabled": true,
+    "type": "DAS"
+  },
+  "aec": {
+    "filter_length": 128,
+    "step_size": 0.1,
+    "regularization": 1e-6,
+    "double_talk_threshold_db": 6
+  },
+  "nr": {
+    "enabled": true,
+    "mode": "traditional",
+    "aggressiveness_db": 8
+  }
+}
