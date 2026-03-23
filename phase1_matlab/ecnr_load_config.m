@@ -52,6 +52,16 @@ if cfg.frame_size <= 0 || mod(cfg.frame_size, 1) ~= 0
     error('ecnr_load_config:InvalidFrameSize', 'frame.length_samples/frame_size must be a positive integer.');
 end
 
+if ~isfield(cfg, 'reference') || ~isstruct(cfg.reference)
+    cfg.reference = struct();
+end
+if ~isfield(cfg.reference, 'source_type')
+    cfg.reference.source_type = 'file';
+end
+if ~isfield(cfg.reference, 'delay_compensation_samples')
+    cfg.reference.delay_compensation_samples = 0;
+end
+
 % Normalize mode for top-level pipeline convenience.
 if isfield(cfg.nr, 'mode')
     cfg.mode = cfg.nr.mode;

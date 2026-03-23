@@ -1,0 +1,8 @@
+{
+  "name": "phase1_offline_wav",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/phase1_mic.wav",
+  "ref_wav": "scenarios/assets/phase1_ref.wav",
+  "output_wav": "scenarios/results/phase1_offline_output.wav",
+  "metrics_csv": "metrics_baselines/phase1_offline_current.csv"
+}

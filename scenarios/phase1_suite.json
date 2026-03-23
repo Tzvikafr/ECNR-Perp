@@ -1,0 +1,14 @@
+{
+  "name": "phase1_suite",
+  "scenarios": [
+    "scenarios/phase1_offline_wav.json"
+  ],
+  "baseline_compare": {
+    "current_csv": "metrics_baselines/phase1_offline_current.csv",
+    "baseline_csv": "metrics_baselines/phase1_offline_baseline.csv",
+    "thresholds": {
+      "erle_window_db_min_delta": -1.0,
+      "snr_out_db_min_delta": -1.5
+    }
+  }
+}

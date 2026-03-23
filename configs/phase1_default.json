@@ -14,7 +14,12 @@
     "filter_length": 128,
     "step_size": 0.1,
     "regularization": 1e-6,
-    "double_talk_threshold_db": 6
+    "double_talk_threshold_db": 6,
+    "erle_window_frames": 25
+  },
+  "reference": {
+    "source_type": "file",
+    "delay_compensation_samples": 0
   },
   "nr": {
     "enabled": true,

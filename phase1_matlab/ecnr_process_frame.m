@@ -20,7 +20,7 @@ end
 [e, state.aec] = aec_process(state.aec, x, ref_frame);
 [y, state.nr] = nr_trad_process(state.nr, e);
 
-[state.metrics, rec] = metrics_update(state.metrics, x, e, y, state.aec.dtd_active);
+[state.metrics, rec] = metrics_update(state.metrics, x, e, y, state.aec.dtd_active, state.aec);
 state.last_metrics = rec;
 
 state.frame_index = state.frame_index + 1;
