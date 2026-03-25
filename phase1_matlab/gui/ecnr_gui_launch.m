@@ -126,8 +126,8 @@ moduleHint.Layout.Row = 8;
 moduleHint.Layout.Column = [1 2];
 moduleHint.Value = {'Hybrid is a guarded placeholder in Phase 1 and currently behaves as residual passthrough.'};
 
-tuningGrid = uigridlayout(tuningTab, [12 2]);
-tuningGrid.RowHeight = repmat({30}, 1, 12);
+tuningGrid = uigridlayout(tuningTab, [13 2]);
+tuningGrid.RowHeight = repmat({30}, 1, 13);
 tuningGrid.ColumnWidth = {210, '1x'};
 
 uilabel(tuningGrid, 'Text', 'Sample Rate (restart)');
@@ -180,89 +180,148 @@ nrAggField = uieditfield(tuningGrid, 'numeric', 'Limits', [0 40], 'Value', 8);
 nrAggField.Layout.Row = 10;
 nrAggField.Layout.Column = 2;
 
+uilabel(tuningGrid, 'Text', 'Waveform View Seconds (hot)');
+waveSecondsField = uieditfield(tuningGrid, 'numeric', 'Limits', [0.1 60], 'Value', 2);
+waveSecondsField.Layout.Row = 11;
+waveSecondsField.Layout.Column = 2;
+
 reinitBtn = uibutton(tuningGrid, 'Text', 'Reinitialize');
-reinitBtn.Layout.Row = 11;
+reinitBtn.Layout.Row = 12;
 reinitBtn.Layout.Column = 1;
 
 runBtn = uibutton(tuningGrid, 'Text', 'Run Scenario');
-runBtn.Layout.Row = 11;
+runBtn.Layout.Row = 12;
 runBtn.Layout.Column = 2;
 
 exportBtn = uibutton(tuningGrid, 'Text', 'Export Metrics CSV');
-exportBtn.Layout.Row = 12;
+exportBtn.Layout.Row = 13;
 exportBtn.Layout.Column = [1 2];
 
-rightPanel = uipanel(outer, 'Title', 'Metrics and Plots');
+rightPanel = uipanel(outer, 'Title', 'Results');
 rightPanel.Layout.Row = 1;
 rightPanel.Layout.Column = 2;
-rightGrid = uigridlayout(rightPanel, [8 2]);
-rightGrid.RowHeight = {34, 120, 140, '1x', '1x', '1x', '1x', '1x'};
-rightGrid.ColumnWidth = {'1x', '1x'};
+rightTabs = uitabgroup(rightPanel);
 
-headerLabel = uilabel(rightGrid, 'Text', 'Latest run: none');
+% --- Metrics Tab ---
+rightMetricsTab = uitab(rightTabs, 'Title', 'Metrics');
+metricsGrid = uigridlayout(rightMetricsTab, [3 2]);
+metricsGrid.RowHeight = {34, '1x', '1x'};
+metricsGrid.ColumnWidth = {'1x', '1x'};
+
+headerLabel = uilabel(metricsGrid, 'Text', 'Latest run: none');
 headerLabel.Layout.Row = 1;
 headerLabel.Layout.Column = [1 2];
 
-metricsArea = uitextarea(rightGrid, 'Editable', 'off');
+metricsArea = uitextarea(metricsGrid, 'Editable', 'off');
 metricsArea.Layout.Row = 2;
 metricsArea.Layout.Column = 1;
 metricsArea.Value = {'Metrics will appear here after run.'};
 
-summaryTable = uitable(rightGrid, 'ColumnName', {'Metric', 'Value'}, 'Data', cell(0, 2));
+summaryTable = uitable(metricsGrid, 'ColumnName', {'Metric', 'Value'}, 'Data', cell(0, 2));
 summaryTable.Layout.Row = 2;
 summaryTable.Layout.Column = 2;
 
-runTable = uitable(rightGrid, 'ColumnName', {'Run', 'Frames', 'ERLE Win', 'SNR Out', 'Convergence s'});
+runTable = uitable(metricsGrid, 'ColumnName', {'Run', 'Frames', 'ERLE Win', 'SNR Out', 'Convergence s'});
 runTable.Layout.Row = 3;
 runTable.Layout.Column = [1 2];
 runTable.Data = cell(0, 5);
 
-axWave = uiaxes(rightGrid);
-axWave.Layout.Row = 4;
-axWave.Layout.Column = [1 2];
-title(axWave, 'Output Waveform (First 2000 Samples)');
-xlabel(axWave, 'Sample');
-ylabel(axWave, 'Amplitude');
+% --- Plots Tab ---
+rightPlotsTab = uitab(rightTabs, 'Title', 'Plots');
+plotsGrid = uigridlayout(rightPlotsTab, [4 1]);
+plotsGrid.RowHeight = {'1x', '1x', '1x', '1x'};
+plotsGrid.ColumnWidth = {'1x'};
 
-axErle = uiaxes(rightGrid);
-axErle.Layout.Row = 5;
-axErle.Layout.Column = [1 2];
+axWaveBefore = uiaxes(plotsGrid);
+axWaveBefore.Layout.Row = 1;
+axWaveBefore.Layout.Column = 1;
+title(axWaveBefore, 'Waveform Before ECNR');
+xlabel(axWaveBefore, 'Sample');
+ylabel(axWaveBefore, 'Amplitude');
+
+axWaveAfter = uiaxes(plotsGrid);
+axWaveAfter.Layout.Row = 2;
+axWaveAfter.Layout.Column = 1;
+title(axWaveAfter, 'Waveform After ECNR');
+xlabel(axWaveAfter, 'Sample');
+ylabel(axWaveAfter, 'Amplitude');
+
+axErle = uiaxes(plotsGrid);
+axErle.Layout.Row = 3;
+axErle.Layout.Column = 1;
 title(axErle, 'ERLE Window Over Frames');
 xlabel(axErle, 'Frame');
 ylabel(axErle, 'ERLE (dB)');
 
-axTrend = uiaxes(rightGrid);
-axTrend.Layout.Row = 6;
-axTrend.Layout.Column = [1 2];
+axTrend = uiaxes(plotsGrid);
+axTrend.Layout.Row = 4;
+axTrend.Layout.Column = 1;
 title(axTrend, 'SNR Out and DTD Timeline');
 xlabel(axTrend, 'Frame');
 ylabel(axTrend, 'Value');
 
-axSpectrogramWith = uiaxes(rightGrid);
-axSpectrogramWith.Layout.Row = 7;
+rightAudioTab = uitab(rightTabs, 'Title', 'Audio');
+audioGrid = uigridlayout(rightAudioTab, [4 2]);
+audioGrid.RowHeight = {36, 36, 36, 36};
+audioGrid.ColumnWidth = {'1x', '1x'};
+
+playBeforeBtn = uibutton(audioGrid, 'Text', 'Play Before ECNR');
+playBeforeBtn.Layout.Row = 1;
+playBeforeBtn.Layout.Column = 1;
+
+playAfterBtn = uibutton(audioGrid, 'Text', 'Play After ECNR');
+playAfterBtn.Layout.Row = 1;
+playAfterBtn.Layout.Column = 2;
+
+playMicBtn = uibutton(audioGrid, 'Text', 'Play Mic WAV');
+playMicBtn.Layout.Row = 2;
+playMicBtn.Layout.Column = 1;
+
+playRefBtn = uibutton(audioGrid, 'Text', 'Play Ref WAV');
+playRefBtn.Layout.Row = 2;
+playRefBtn.Layout.Column = 2;
+
+playOutputBtn = uibutton(audioGrid, 'Text', 'Play Output WAV');
+playOutputBtn.Layout.Row = 3;
+playOutputBtn.Layout.Column = [1 2];
+
+stopAudioBtn = uibutton(audioGrid, 'Text', 'Stop Audio');
+stopAudioBtn.Layout.Row = 4;
+stopAudioBtn.Layout.Column = [1 2];
+
+% --- Spectrograms Tab ---
+rightSpecTab = uitab(rightTabs, 'Title', 'Spectrograms');
+specGrid = uigridlayout(rightSpecTab, [2 2]);
+specGrid.RowHeight = {'1x', '1x'};
+specGrid.ColumnWidth = {'1x', '1x'};
+
+axSpectrogramWith = uiaxes(specGrid);
+axSpectrogramWith.Layout.Row = 1;
 axSpectrogramWith.Layout.Column = 1;
 title(axSpectrogramWith, 'Spectrogram (With Algorithm)');
 xlabel(axSpectrogramWith, 'Time (s)');
 ylabel(axSpectrogramWith, 'Frequency (Hz)');
 
-axSpectrogramWithout = uiaxes(rightGrid);
-axSpectrogramWithout.Layout.Row = 7;
+axSpectrogramWithout = uiaxes(specGrid);
+axSpectrogramWithout.Layout.Row = 1;
 axSpectrogramWithout.Layout.Column = 2;
 title(axSpectrogramWithout, 'Spectrogram (Modules Off)');
 xlabel(axSpectrogramWithout, 'Time (s)');
 ylabel(axSpectrogramWithout, 'Frequency (Hz)');
 
-axSpectrogramDiff = uiaxes(rightGrid);
-axSpectrogramDiff.Layout.Row = 8;
+axSpectrogramDiff = uiaxes(specGrid);
+axSpectrogramDiff.Layout.Row = 2;
 axSpectrogramDiff.Layout.Column = [1 2];
 title(axSpectrogramDiff, 'Spectrogram Difference (dB) - Algorithm Effect');
 xlabel(axSpectrogramDiff, 'Time (s)');
 ylabel(axSpectrogramDiff, 'Frequency (Hz)');
 
 lastResult = [];
+lastResultWithout = [];
 runRows = cell(0, 5);
 restartSnapshot = struct();
 restartDirty = false;
+activePlayer = [];
 
 scenarioBrowseBtn.ButtonPushedFcn = @(~, ~) browseInput(scenarioEdit, fullfile(workspaceRoot, 'scenarios', '*.json'), false);
 configBrowseBtn.ButtonPushedFcn = @(~, ~) browseInput(configEdit, fullfile(workspaceRoot, 'configs', '*.json'), false);
@@ -275,13 +334,19 @@ scenarioEdit.ValueChangedFcn = @onScenarioChanged;
 reinitBtn.ButtonPushedFcn = @onReinitialize;
 runBtn.ButtonPushedFcn = @onRun;
 exportBtn.ButtonPushedFcn = @onExportMetrics;
+playBeforeBtn.ButtonPushedFcn = @onPlayBefore;
+playAfterBtn.ButtonPushedFcn = @onPlayAfter;
+playMicBtn.ButtonPushedFcn = @onPlayMic;
+playRefBtn.ButtonPushedFcn = @onPlayRef;
+playOutputBtn.ButtonPushedFcn = @onPlayOutput;
+stopAudioBtn.ButtonPushedFcn = @onStopAudio;
 
 restartControls = [sampleRateField, frameSizeField, micCountField, aecFilterField, erleWindowField, beamAlgo, aecAlgo, nrAlgo];
 for i = 1:numel(restartControls)
     restartControls(i).ValueChangedFcn = @onRestartControlChanged;
 end
 
-hotControls = [beamEnable, aecEnable, nrEnable, refSource, refDelayField, aecStepField, aecRegField, dtdField, nrAggField];
+hotControls = [beamEnable, aecEnable, nrEnable, refSource, refDelayField, aecStepField, aecRegField, dtdField, nrAggField, waveSecondsField];
 for i = 1:numel(hotControls)
     hotControls(i).ValueChangedFcn = @onHotControlChanged;
 end
@@ -412,6 +477,7 @@ captureRestartSnapshot();
             refOpts.param_overrides = refOverrides;
             
             resultWithout = run_scenario(scenarioInput, refOpts);
+            lastResultWithout = resultWithout;
             
             renderResult(result, resultWithout);
             appendRunSummary(result);
@@ -507,10 +573,22 @@ captureRestartSnapshot();
             'Convergence (s)', formatConvergence(convSec)
         };
 
-        y = result.y;
-        showN = min(numel(y), 2000);
-        plot(axWave, 1:showN, y(1:showN), 'LineWidth', 1.0);
-        grid(axWave, 'on');
+        fs = result.sample_rate_hz;
+        viewSamples = max(1, floor(waveSecondsField.Value * fs));
+
+        yAfter = result.y;
+        showNAfter = min(numel(yAfter), viewSamples);
+        plot(axWaveAfter, 1:showNAfter, yAfter(1:showNAfter), 'LineWidth', 1.0);
+        grid(axWaveAfter, 'on');
+
+        if ~isempty(resultWithout) && isfield(resultWithout, 'y') && ~isempty(resultWithout.y)
+            yBefore = resultWithout.y;
+        else
+            yBefore = yAfter;
+        end
+        showNBefore = min(numel(yBefore), viewSamples);
+        plot(axWaveBefore, 1:showNBefore, yBefore(1:showNBefore), 'LineWidth', 1.0);
+        grid(axWaveBefore, 'on');
 
         erleSeries = [result.records.erle_window_db];
         plot(axErle, 1:numel(erleSeries), erleSeries, 'LineWidth', 1.2);
@@ -528,7 +606,6 @@ captureRestartSnapshot();
         grid(axTrend, 'on');
         
         % Compute and display spectrograms
-        fs = result.sample_rate_hz;
         y_with = result.y;
         y_without = resultWithout.y;
         
@@ -541,7 +618,6 @@ captureRestartSnapshot();
         fftnPoints = 512;
         hopLength = 128;
         window = hann(fftnPoints, 'periodic');
-        freqMax = fs / 2;
         
         % Compute spectrograms
         [S_with, F_with, T_with] = spectrogram(y_with, window, fftnPoints - hopLength, fftnPoints, fs);
@@ -592,6 +668,83 @@ captureRestartSnapshot();
         % Set symmetric colormap limits for difference
         maxAbsDiff = max(abs(S_diff(:)));
         clim(axSpectrogramDiff, [-maxAbsDiff, maxAbsDiff]);
+        
+            % Switch to Plots tab so results are immediately visible
+            rightTabs.SelectedTab = rightPlotsTab;
+    end
+
+    function onPlayBefore(~, ~)
+        if isempty(lastResultWithout) || ~isfield(lastResultWithout, 'y') || isempty(lastResultWithout.y)
+            uialert(fig, 'Run a scenario before playing audio.', 'No Audio');
+            return;
+        end
+        playSignal(lastResultWithout.y, lastResultWithout.sample_rate_hz, 'Playing before-ECNR audio...');
+    end
+
+    function onPlayAfter(~, ~)
+        if isempty(lastResult) || ~isfield(lastResult, 'y') || isempty(lastResult.y)
+            uialert(fig, 'Run a scenario before playing audio.', 'No Audio');
+            return;
+        end
+        playSignal(lastResult.y, lastResult.sample_rate_hz, 'Playing after-ECNR audio...');
+    end
+
+    function onPlayMic(~, ~)
+        micPath = resolveUiPath(micEdit.Value);
+        if ~isfile(micPath)
+            uialert(fig, sprintf('Mic WAV not found: %s', micPath), 'File Not Found');
+            return;
+        end
+        [x, fs] = audioread(micPath);
+        playSignal(makeMono(x), fs, 'Playing mic WAV...');
+    end
+
+    function onPlayRef(~, ~)
+        refPath = resolveUiPath(refEdit.Value);
+        if ~isfile(refPath)
+            uialert(fig, sprintf('Ref WAV not found: %s', refPath), 'File Not Found');
+            return;
+        end
+        [x, fs] = audioread(refPath);
+        playSignal(makeMono(x), fs, 'Playing reference WAV...');
+    end
+
+    function onPlayOutput(~, ~)
+        outPath = resolveUiPath(outputWavEdit.Value);
+        if ~isfile(outPath)
+            uialert(fig, sprintf('Output WAV not found: %s', outPath), 'File Not Found');
+            return;
+        end
+        [x, fs] = audioread(outPath);
+        playSignal(makeMono(x), fs, 'Playing output WAV...');
+    end
+
+    function onStopAudio(~, ~)
+        if ~isempty(activePlayer)
+            stop(activePlayer);
+            activePlayer = [];
+            updateStatus('Audio stopped.');
+        end
+    end
+
+    function playSignal(x, fs, statusMessage)
+        if isempty(x)
+            uialert(fig, 'Selected audio is empty.', 'No Audio');
+            return;
+        end
+        if ~isempty(activePlayer)
+            stop(activePlayer);
+        end
+        x = max(min(x, 1), -1);
+        activePlayer = audioplayer(x, fs);
+        updateStatus(statusMessage);
+        play(activePlayer);
+    end
+
+    function x = makeMono(x)
+        if size(x, 2) > 1
+            x = mean(x, 2);
+        end
     end
 
     function appendRunSummary(result)
