@@ -1,0 +1,8 @@
+numpy>=1.24
+sounddevice>=0.4.6
+# Sprint 4 — GUI
+pyqtgraph>=0.13
+PyQt5>=5.15
+# Sprint 5 — Hybrid DL (optional)
+# torch>=2.0
+# onnxruntime>=1.17
