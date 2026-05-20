@@ -110,10 +110,12 @@ See [docs/PHASE1_RUNBOOK.md](docs/PHASE1_RUNBOOK.md) for full steps. Quick refer
 ```
 
 ### Launch GUI
+GUI requires an interactive session — use `-r`, not `-batch`:
 ```powershell
-& "C:\Program Files\MATLAB\R2023b\bin\matlab.exe" -batch `
-  "cd('c:/Users/tzvika/My Drive/Learn/ECNR trials/ECNR Perp'); addpath(genpath('phase1_matlab')); ecnr_gui_launch();"
+& "C:\Program Files\MATLAB\R2023b\bin\matlab.exe" -r `
+  "run('c:/Users/tzvika/My Drive/Learn/ECNR trials/ECNR Perp/run_phase1_gui.m')"
 ```
+Or from the MATLAB command window: `run('run_phase1_gui.m')`
 
 ---
 

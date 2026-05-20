@@ -75,12 +75,18 @@ def main():
         f"mics={cfg.mic_count}  mode={cfg.mode.name}"
     )
 
+    def _parse_device(d):
+        try:
+            return int(d)
+        except (TypeError, ValueError):
+            return d
+
     engine = EcnrEngine(cfg)
     rt = RtAudio(
         cfg,
         frame_callback=_make_frame_callback(engine),
-        input_device=args.input_device,
-        output_device=args.output_device,
+        input_device=_parse_device(args.input_device),
+        output_device=_parse_device(args.output_device),
     )
 
     rt.start()

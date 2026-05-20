@@ -53,10 +53,19 @@ class RtAudio:
     # ------------------------------------------------------------------
 
     def start(self) -> None:
+        # Query device to determine how many output channels it supports
+        out_dev = self.output_device if self.output_device is not None else sd.default.device[1]
+        try:
+            out_channels = sd.query_devices(out_dev)['max_output_channels']
+            out_channels = max(1, min(out_channels, 2))  # use 1 or 2 (stereo)
+        except Exception:
+            out_channels = 2
+        self._out_channels = out_channels
+
         self._stream = sd.Stream(
             samplerate=self.config.sampling_rate,
             blocksize=self.config.frame_size,
-            channels=(self.config.mic_count, 1),
+            channels=(self.config.mic_count, out_channels),
             dtype="float32",
             latency="low",
             device=(self.input_device, self.output_device),
@@ -137,7 +146,10 @@ class RtAudio:
                     rtt = (self._click_detected_ns - self._click_sent_ns) / 1e6
                 print(f"[rt_audio] Click detected  acoustic_round_trip={rtt:.1f} ms")
 
+        # frame_callback writes mono into outdata[:, 0]; broadcast to all channels
         self.frame_callback(indata, outdata)
+        for ch in range(1, outdata.shape[1]):
+            outdata[:, ch] = outdata[:, 0]
 
 
 # ------------------------------------------------------------------
