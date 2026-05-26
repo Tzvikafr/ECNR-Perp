@@ -65,6 +65,7 @@ class RefConfig:
     device_id: str = ""
     channel_index: int = 0
     delay_compensation_samples: int = 0
+    file_path: str = ""  # populated from scenario JSON ref_wav
 
 
 @dataclass
@@ -192,11 +193,17 @@ def load_config(config_path: str, base_dir: str = ".") -> EcnrConfig:
 def load_scenario_config(scenario_path: str) -> EcnrConfig:
     """Load the ecnr config referenced by a Phase 1 scenario JSON."""
     scenario_path = Path(scenario_path)
+    base_dir = scenario_path.parent.parent  # repo root
+
     with open(scenario_path, "r") as f:
         scenario = json.load(f)
 
     config_rel = scenario.get("config")
-    if not config_rel:
-        return EcnrConfig()
+    cfg = load_config(config_rel, base_dir=str(base_dir)) if config_rel else EcnrConfig()
 
-    return load_config(config_rel, base_dir=str(scenario_path.parent.parent))
+    # Resolve reference WAV path from scenario into cfg so ReferenceSource can open it
+    ref_wav = scenario.get("ref_wav")
+    if ref_wav:
+        cfg.reference.file_path = str(base_dir / ref_wav)
+
+    return cfg

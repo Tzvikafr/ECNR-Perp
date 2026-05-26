@@ -50,4 +50,4 @@ try:
 except Exception as e:
     print(f"Error: {e}", flush=True)
     import traceback
-    traceback.print_exc(flush=True)
+    traceback.print_exc()

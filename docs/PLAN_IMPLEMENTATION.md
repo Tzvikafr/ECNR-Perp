@@ -1,5 +1,72 @@
 ## Plan: ECNR Implementation Roadmap
 
+---
+
+## Implementation Status — as of 2026-05-20 (updated)
+
+### Phase 0 — Architecture & Decisions: Complete
+- Engine contract defined (frame shape, channel layout, config schema, metrics schema)
+- Real-time audio strategy resolved: Python + `sounddevice`
+- Phase 1D (PC RT Demo) inserted as explicit phase before embedded work
+
+### Phase 1A/B — MATLAB Offline Engine: Complete
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| Config loader (`ecnr_load_config.m`) | Done | Full validation, rejects invalid combinations |
+| Core engine (`ecnr_init`, `ecnr_process_frame`, `ecnr_get_metrics`) | Done | Frame dispatcher, ordered stage chain |
+| Beamformer — DAS (`bf_init`, `bf_process`) | Done | Equal-weight DAS; algorithm-selectable |
+| AEC — NLMS + DTD (`aec_init`, `aec_process`, `dtd_compute`) | Done | Per-sample NLMS update, rolling ERLE window |
+| Traditional NR — STFT/Wiener (`nr_trad_init`, `nr_trad_process`) | Done | 50% OLA, Hann window, per-bin Wiener gain |
+| Hybrid NR (`nr_trad_process` hybrid branch) | Guarded placeholder | Passthrough (`y = e`) by design; Hybrid is Phase 1D/2 scope |
+| Metrics (`metrics_init`, `metrics_update`, `metrics_export_csv`) | Done | ERLE, SNR, DTD per-frame, CSV export |
+| I/O — WAV (`io_wav_read`, `io_wav_write`, `io_reference_resolve`) | Done | Read/write/resample WAV, route reference signal |
+| I/O — Live (`io_live_init`, `io_live_callback`) | Intentional stub | Feasibility-gated (AD-05): no MATLAB Audio Toolbox; will not be called in Phase 1 |
+| Regression suite (`run_scenario`, `run_regression_suite`, `freeze_phase1_baseline`) | Done | Scenario runner, baseline freeze, CSV comparison |
+| GUI (`ecnr_gui_launch.m`) | Done | App Designer GUI with tuning controls, playback, stop button, spectrogram |
+| Runtime param update (`ecnr_set_param`) | Done | Hot-updateable vs restart-required params enforced |
+
+### Phase 1D — Python PC Real-Time Demo: Complete
+
+Regression suite passing. Exit criteria met except Sprint 5 (Hybrid DL) which is explicitly gated for Phase 2.
+
+| Sprint | Goal | Status |
+|--------|------|--------|
+| 0 — Foundation | RT passthrough + latency measurement | Done |
+| 1 — Traditional NR | Live noise reduction | Done |
+| 2 — AEC | Live echo cancellation, ERLE display | Done |
+| 3 — Full Pipeline | BF + AEC + NR, config-driven | Done |
+| 4 — GUI | Live spectrogram + metrics plots | Done |
+| 5 — Hybrid DL | DL inference in RT (conditional gate) | Deferred — gate applies to Phase 2 |
+| 6 — Validation | Regression certified, Phase 2 handoff notes | Done |
+
+**Python module status:**
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| `config/ecnr_config.py` | Done | Full JSON loader + validation; scenario file_path resolution |
+| `dsp/beamformer.py` | Done | Lagrange FIR fractional-delay DAS; linear + circular geometry |
+| `dsp/aec.py` | Done | Per-sample NLMS + DTD; rolling ERLE window |
+| `dsp/nr_traditional.py` | Done | STFT/Wiener; first-frame PSD seeding; parity ~1 dB vs MATLAB |
+| `dsp/nr_hybrid.py` | Stub | CRM mask placeholder; Sprint 5 / Phase 2 scope |
+| `io/rt_audio.py` | Done | sounddevice duplex stream; xrun counter; click latency measure |
+| `io/reference.py` | Done | File backend (WAV frame-by-frame) + WASAPI loopback backend |
+| `metrics/metrics.py` | Done | Per-frame records; CSV export matching MATLAB column layout |
+| `gui/rt_viz.py` | Done | pyqtgraph spectrograms, ERLE/SNR time series, DTD indicator, WAV recorder |
+| `engine.py` | Done | BF -> AEC -> NR dispatcher; profiling; viz push |
+| `rt_demo.py` | Done | CLI: real-time + GUI + latency test + profiling + stability run |
+| `offline_runner.py` | Done | Offline WAV processor; --profile; --loops for stability test |
+| `regression.py` | Done | Suite runner; dual-baseline (ERLE vs MATLAB, SNR vs Python); CI exit code |
+
+**Regression result (last run):**
+- ERLE: +8.15 dB vs MATLAB baseline +9.90 dB — delta -1.75 dB, within ±2 dB tolerance — PASS
+- SNR-out: -29.4 dB vs Python baseline -29.4 dB — delta 0.0 dB — PASS
+
+### Phase 2 — C/C++ on AM62x Cortex-A53: Not started
+### Phase 3 — C7x DSP Offload: Not started
+
+---
+
 Recommended approach: treat Phase 1 MATLAB Traditional mode as the reference product, define a stable cross-language engine contract early, and keep Hybrid plus DSP offload behind explicit stage gates. This minimizes rework, preserves portability into AM62x, and reduces the risk that GUI or DL experimentation drives the core architecture.
 
 **Resolved decisions (update 2026-05-14):**

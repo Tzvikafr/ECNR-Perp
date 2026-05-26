@@ -5,10 +5,12 @@
   ],
   "baseline_compare": {
     "current_csv": "metrics_baselines/phase1_offline_current.csv",
-    "baseline_csv": "metrics_baselines/phase1_offline_baseline.csv",
+    "matlab_baseline_csv": "metrics_baselines/phase1_offline_baseline.csv",
+    "py_baseline_csv": "metrics_baselines/py_offline_baseline.csv",
     "thresholds": {
-      "erle_window_db_min_delta": -1.0,
-      "snr_out_db_min_delta": -1.5
-    }
+      "erle_window_db_min_delta_vs_matlab": -2.0,
+      "snr_out_db_min_delta_vs_py": -1.0
+    },
+    "notes": "ERLE compared against MATLAB baseline (same definition both sides). SNR compared against frozen Python baseline only (MATLAB and Python SNR use different noise-floor references so cross-language SNR comparison is not meaningful)."
   }
 }

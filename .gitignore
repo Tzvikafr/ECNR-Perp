@@ -1,0 +1,14 @@
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+.venv/
+
+# Generated run outputs
+scenarios/results/
+
+# IDE
+.vscode/
+*.swp

@@ -1,5 +1,6 @@
 numpy>=1.24
 sounddevice>=0.4.6
+soundfile>=0.12
 # Sprint 4 — GUI
 pyqtgraph>=0.13
 PyQt5>=5.15
