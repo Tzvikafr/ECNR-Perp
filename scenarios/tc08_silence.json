@@ -1,0 +1,12 @@
+{
+  "name": "tc08_silence",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc08_silence_mic.wav",
+  "ref_wav": "scenarios/assets/tc08_silence_ref.wav",
+  "output_wav": "scenarios/results/tc08_silence_output.wav",
+  "metrics_csv": "scenarios/results/tc08_silence_metrics.csv",
+  "expected": {
+    "no_crash": true,
+    "description": "Silence input: pipeline must complete without crash or NaN output"
+  }
+}

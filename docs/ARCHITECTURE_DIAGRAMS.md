@@ -9,7 +9,6 @@ All diagrams use [Mermaid](https://mermaid.js.org/) syntax, rendered natively on
 ## 1. System Architecture Overview — Three-Phase Deployment
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#111827", "primaryBorderColor": "#64748b", "lineColor": "#334155", "textColor": "#111827", "clusterBkg": "#f8fafc", "clusterBorder": "#94a3b8", "edgeLabelBackground": "#ffffff"}}}%%
 graph TB
     subgraph P1["Phase 1 — PC Prototype"]
         direction TB
@@ -44,7 +43,6 @@ graph TB
 ## 2. Real-Time Audio Processing Pipeline
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#111827", "primaryBorderColor": "#64748b", "lineColor": "#334155", "textColor": "#111827", "clusterBkg": "#f8fafc", "clusterBorder": "#94a3b8", "edgeLabelBackground": "#ffffff"}}}%%
 flowchart LR
     MIC["🎤 Microphone Array\n(1, 2, or 4 ch)\n16 kHz / 48 kHz"]
     REF["📢 Reference Source\n(file / loopback /\ncapture channel)"]
@@ -82,7 +80,6 @@ flowchart LR
 ## 3. Python Module Architecture
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#111827", "primaryBorderColor": "#64748b", "lineColor": "#334155", "textColor": "#111827", "clusterBkg": "#f8fafc", "clusterBorder": "#94a3b8", "edgeLabelBackground": "#ffffff"}}}%%
 graph TD
     CLI["rt_demo.py\n(CLI Entry Point)"]
 
@@ -137,7 +134,6 @@ graph TD
 ## 4. MATLAB Reference Engine Architecture
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#111827", "primaryBorderColor": "#64748b", "lineColor": "#334155", "textColor": "#111827", "clusterBkg": "#f8fafc", "clusterBorder": "#94a3b8", "edgeLabelBackground": "#ffffff"}}}%%
 graph TD
     subgraph MATLAB_GUI["GUI (App Designer)"]
         GUI2["run_phase1_gui.m\nStart / Stop / Tune"]
@@ -217,7 +213,6 @@ graph TD
 ## 5. AEC — NLMS Frame Processing Flowchart
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#111827", "primaryBorderColor": "#64748b", "lineColor": "#334155", "textColor": "#111827", "clusterBkg": "#f8fafc", "clusterBorder": "#94a3b8", "edgeLabelBackground": "#ffffff"}}}%%
 flowchart TD
     START(["Frame In\nmic_signal (N,)\nref_signal (N,)"])
 
@@ -242,7 +237,6 @@ flowchart TD
 ## 6. Traditional NR — STFT / OLA Processing Flowchart
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#111827", "primaryBorderColor": "#64748b", "lineColor": "#334155", "textColor": "#111827", "clusterBkg": "#f8fafc", "clusterBorder": "#94a3b8", "edgeLabelBackground": "#ffffff"}}}%%
 flowchart TD
     START(["Frame In (N samples)\naec_residual"])
 
@@ -269,7 +263,6 @@ flowchart TD
 ## 7. Configuration & Scenario Loading Flow
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#111827", "primaryBorderColor": "#64748b", "lineColor": "#334155", "textColor": "#111827", "clusterBkg": "#f8fafc", "clusterBorder": "#94a3b8", "edgeLabelBackground": "#ffffff"}}}%%
 flowchart TD
     CLI2(["rt_demo.py\nCLI args"])
 
@@ -309,7 +302,6 @@ flowchart TD
 ## 8. Phase 3 — Embedded IPC Architecture (Future)
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#111827", "primaryBorderColor": "#64748b", "lineColor": "#334155", "textColor": "#111827", "clusterBkg": "#f8fafc", "clusterBorder": "#94a3b8", "edgeLabelBackground": "#ffffff"}}}%%
 graph LR
     subgraph A53["Cortex-A53 (Linux)"]
         ALSA["ALSA Driver\nI/O"]

@@ -1,0 +1,13 @@
+{
+  "name": "tc02_echo_single_talk",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc02_echo_single_talk_mic.wav",
+  "ref_wav": "scenarios/assets/tc02_echo_single_talk_ref.wav",
+  "output_wav": "scenarios/results/tc02_echo_single_talk_output.wav",
+  "metrics_csv": "scenarios/results/tc02_echo_single_talk_metrics.csv",
+  "expected": {
+    "erle_mean_db_min": 10.0,
+    "dtd_frames_max_pct": 10.0,
+    "description": "Far-end AI speech with silent head/tail; AEC converges while DTD stays mostly off"
+  }
+}

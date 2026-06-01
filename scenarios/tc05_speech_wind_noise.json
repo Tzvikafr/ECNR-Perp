@@ -1,0 +1,12 @@
+{
+  "name": "tc05_speech_wind_noise",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc05_speech_wind_noise_mic.wav",
+  "ref_wav": "scenarios/assets/tc05_speech_wind_noise_ref.wav",
+  "output_wav": "scenarios/results/tc05_speech_wind_noise_output.wav",
+  "metrics_csv": "scenarios/results/tc05_speech_wind_noise_metrics.csv",
+  "expected": {
+    "snr_delta_mean_db_max": -3.0,
+    "description": "AI speech plus wind noise in active window with silent head/tail"
+  }
+}

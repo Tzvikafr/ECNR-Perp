@@ -1,0 +1,12 @@
+{
+  "name": "tc03_double_talk",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc03_double_talk_mic.wav",
+  "ref_wav": "scenarios/assets/tc03_double_talk_ref.wav",
+  "output_wav": "scenarios/results/tc03_double_talk_output.wav",
+  "metrics_csv": "scenarios/results/tc03_double_talk_metrics.csv",
+  "expected": {
+    "dtd_frames_min_pct": 30.0,
+    "description": "Aggressive overlap: near-end AI speech dominates far-end during active window"
+  }
+}

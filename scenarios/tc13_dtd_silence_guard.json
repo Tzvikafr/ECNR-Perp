@@ -1,0 +1,12 @@
+{
+  "name": "tc13_dtd_silence_guard",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc13_dtd_silence_guard_mic.wav",
+  "ref_wav": "scenarios/assets/tc13_dtd_silence_guard_ref.wav",
+  "output_wav": "scenarios/results/tc13_dtd_silence_guard_output.wav",
+  "metrics_csv": "scenarios/results/tc13_dtd_silence_guard_metrics.csv",
+  "expected": {
+    "dtd_frames_min_pct": 15.0,
+    "description": "Silence-guarded timeline with a short overlap burst to verify DTD activation remains localized"
+  }
+}

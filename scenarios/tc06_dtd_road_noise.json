@@ -1,0 +1,12 @@
+{
+  "name": "tc06_dtd_road_noise",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc06_dtd_road_noise_mic.wav",
+  "ref_wav": "scenarios/assets/tc06_dtd_road_noise_ref.wav",
+  "output_wav": "scenarios/results/tc06_dtd_road_noise_output.wav",
+  "metrics_csv": "scenarios/results/tc06_dtd_road_noise_metrics.csv",
+  "expected": {
+    "dtd_frames_min_pct": 20.0,
+    "description": "2s echo-only convergence then AI speech overlap with road noise and silent head/tail"
+  }
+}

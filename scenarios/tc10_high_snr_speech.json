@@ -1,0 +1,12 @@
+{
+  "name": "tc10_high_snr_speech",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc10_high_snr_speech_mic.wav",
+  "ref_wav": "scenarios/assets/tc10_high_snr_speech_ref.wav",
+  "output_wav": "scenarios/results/tc10_high_snr_speech_output.wav",
+  "metrics_csv": "scenarios/results/tc10_high_snr_speech_metrics.csv",
+  "expected": {
+    "snr_delta_mean_db_max": -1.0,
+    "description": "High-SNR AI speech with silent head/tail; confirms NR remains active"
+  }
+}

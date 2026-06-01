@@ -1,0 +1,12 @@
+{
+  "name": "tc01_speech_only",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc01_speech_only_mic.wav",
+  "ref_wav": "scenarios/assets/tc01_speech_only_ref.wav",
+  "output_wav": "scenarios/results/tc01_speech_only_output.wav",
+  "metrics_csv": "scenarios/results/tc01_speech_only_metrics.csv",
+  "expected": {
+    "no_crash": true,
+    "description": "AI speech near-end only with 2s head/tail silence in both channels"
+  }
+}

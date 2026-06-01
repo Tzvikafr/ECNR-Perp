@@ -1,0 +1,19 @@
+{
+  "name": "ecnr_test_suite",
+  "description": "AI speech-driven ECNR validation suite with silence windows and DTD stress cases",
+  "scenarios": [
+    "scenarios/tc01_speech_only.json",
+    "scenarios/tc02_echo_single_talk.json",
+    "scenarios/tc03_double_talk.json",
+    "scenarios/tc04_speech_road_noise.json",
+    "scenarios/tc05_speech_wind_noise.json",
+    "scenarios/tc06_dtd_road_noise.json",
+    "scenarios/tc07_dtd_wind_noise.json",
+    "scenarios/tc08_silence.json",
+    "scenarios/tc09_aec_convergence.json",
+    "scenarios/tc10_high_snr_speech.json",
+    "scenarios/tc11_dtd_speech_moderate.json",
+    "scenarios/tc12_dtd_speech_aggressive.json",
+    "scenarios/tc13_dtd_silence_guard.json"
+  ]
+}

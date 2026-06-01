@@ -1,0 +1,12 @@
+{
+  "name": "tc12_dtd_speech_aggressive",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc12_dtd_speech_aggressive_mic.wav",
+  "ref_wav": "scenarios/assets/tc12_dtd_speech_aggressive_ref.wav",
+  "output_wav": "scenarios/results/tc12_dtd_speech_aggressive_output.wav",
+  "metrics_csv": "scenarios/results/tc12_dtd_speech_aggressive_metrics.csv",
+  "expected": {
+    "dtd_frames_min_pct": 25.0,
+    "description": "Aggressive DTD overlap (+14 dB near-end) with enforced silence windows"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "tc09_aec_convergence",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc09_aec_convergence_mic.wav",
+  "ref_wav": "scenarios/assets/tc09_aec_convergence_ref.wav",
+  "output_wav": "scenarios/results/tc09_aec_convergence_output.wav",
+  "metrics_csv": "scenarios/results/tc09_aec_convergence_metrics.csv",
+  "expected": {
+    "erle_mean_db_min": 15.0,
+    "dtd_first_half_max_pct": 5.0,
+    "dtd_second_half_min_pct": 40.0,
+    "description": "AEC convergence then delayed overlap: DTD low in first active half and high in second"
+  }
+}

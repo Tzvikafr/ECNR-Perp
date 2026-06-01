@@ -1,0 +1,12 @@
+{
+  "name": "tc11_dtd_speech_moderate",
+  "config": "configs/phase1_default.json",
+  "mic_wav": "scenarios/assets/tc11_dtd_speech_moderate_mic.wav",
+  "ref_wav": "scenarios/assets/tc11_dtd_speech_moderate_ref.wav",
+  "output_wav": "scenarios/results/tc11_dtd_speech_moderate_output.wav",
+  "metrics_csv": "scenarios/results/tc11_dtd_speech_moderate_metrics.csv",
+  "expected": {
+    "dtd_frames_min_pct": 12.0,
+    "description": "Moderate DTD overlap (+8 dB near-end) bounded by silent head/tail windows"
+  }
+}
