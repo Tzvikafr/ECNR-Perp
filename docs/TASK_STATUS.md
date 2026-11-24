@@ -6,6 +6,15 @@
 
 ---
 
+## Canonical Document Links
+
+- Operations and run commands: `docs/RUNBOOK_OPERATIONS.md`
+- Phase roadmap and decisions: `docs/ROADMAP.md`
+- Module implementation status: `docs/MODULES_STATUS.md`
+- Acceptance gates and criteria: `docs/ACCEPTANCE_CRITERIA.md`
+
+---
+
 ## Current Summary
 
 The project has a completed Phase 1 MATLAB offline baseline and a substantially completed Phase 1D Python PC real-time demo. The active codebase includes Python implementations for configuration loading, beamforming, AEC, traditional NR, metrics, offline regression, live audio, and GUI visualization.
@@ -16,7 +25,7 @@ Important caveat: the working tree is currently dirty, with both source changes 
 
 ---
 
-## Phase Status
+## Phase Status Snapshot
 
 | Phase | Status | Notes |
 |---|---|---|
@@ -28,7 +37,7 @@ Important caveat: the working tree is currently dirty, with both source changes 
 
 ---
 
-## Implemented Areas
+## Implemented Areas Snapshot
 
 | Area | Status | Evidence |
 |---|---|---|
@@ -46,6 +55,8 @@ Important caveat: the working tree is currently dirty, with both source changes 
 ---
 
 ## Verification Snapshot
+
+Operational command ownership moved to `docs/RUNBOOK_OPERATIONS.md`. This section keeps evidence records only.
 
 **Verification run: 2026-05-26** (Phase 1D closeout)
 
@@ -76,6 +87,8 @@ There are also repeated warnings that Git cannot access `C:\Users\tzvika\.config
 
 ## Blockers (all resolved 2026-05-26)
 
+Detailed troubleshooting and command remediation steps live in `docs/RUNBOOK_OPERATIONS.md`.
+
 | Blocker | Status |
 |---|---|
 | `.venv` missing `soundfile` | Resolved — `soundfile` 0.13.1 installed via `pip install -r requirements.txt`. |
@@ -100,6 +113,8 @@ There are also repeated warnings that Git cannot access `C:\Users\tzvika\.config
 - [x] Phase 1D marked as complete.
 
 ### Phase 2 Start
+
+Detailed gate criteria are tracked in `docs/ACCEPTANCE_CRITERIA.md`.
 
 - [ ] Create C/C++ project skeleton for portable ECNR core.
 - [ ] Port config schema validation first.

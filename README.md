@@ -6,12 +6,7 @@ End-to-end noise reduction pipeline progressing from MATLAB offline prototype â†
 
 ## Phase roadmap
 
-```
-Phase 1A/B  MATLAB offline engine + GUI          Complete
-Phase 1D    Python PC real-time demo             Complete (Sprints 0-4, 6 done; Sprint 5 Hybrid deferred)
-Phase 2     C/C++ portable core on AM62x Linux   Pending Phase 1D exit gate
-Phase 3     DSP/NPU offload on C7x              Pending Phase 2 exit gate
-```
+See `docs/ROADMAP.md` for canonical phase sequencing and status.
 
 ---
 
@@ -126,26 +121,16 @@ Exit code 0 = PASS, 1 = FAIL. Compares:
 
 ## MATLAB â€” quick reference
 
-See [docs/PHASE1_RUNBOOK.md](docs/PHASE1_RUNBOOK.md) for full steps.
+See `docs/RUNBOOK_OPERATIONS.md` for MATLAB baseline generation, regression, GUI launch, and smoke-test commands.
 
-### Generate test assets and freeze baseline
-```powershell
-& "C:\Program Files\MATLAB\R2023b\bin\matlab.exe" -batch `
-  "cd('c:/Users/tzvika/My Drive/Learn/ECNR trials/ECNR Perp'); addpath(genpath('phase1_matlab')); freeze_phase1_baseline();"
+## Smoke tests
+
+```sh
+python test_simple.py
+python test_audio_levels.py --device-in 1 --device-out 3
 ```
 
-### Run regression suite
-```powershell
-& "C:\Program Files\MATLAB\R2023b\bin\matlab.exe" -batch `
-  "cd('c:/Users/tzvika/My Drive/Learn/ECNR trials/ECNR Perp'); addpath(genpath('phase1_matlab')); s = run_phase1_suite_from_workspace(); disp(s);"
-```
-
-### Launch GUI
-```powershell
-& "C:\Program Files\MATLAB\R2023b\bin\matlab.exe" -r `
-  "run('c:/Users/tzvika/My Drive/Learn/ECNR trials/ECNR Perp/run_phase1_gui.m')"
-```
-Or from the MATLAB command window: `run('run_phase1_gui.m')`
+Use `--device-in` and `--device-out` to match local hardware.
 
 ---
 
@@ -177,14 +162,18 @@ Scenarios in `scenarios/` extend a config with WAV file paths for offline use.
 
 | Document | Description |
 |---|---|
+| [docs/RUNBOOK_OPERATIONS.md](docs/RUNBOOK_OPERATIONS.md) | Canonical operational runbook for MATLAB and Python workflows |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Canonical phase roadmap and decision trajectory |
+| [docs/MODULES_STATUS.md](docs/MODULES_STATUS.md) | Canonical module implementation status by phase |
+| [docs/ACCEPTANCE_CRITERIA.md](docs/ACCEPTANCE_CRITERIA.md) | Canonical phase gates and acceptance criteria |
 | [docs/PRD.md](docs/PRD.md) | Product requirements, phase gates, success metrics |
 | [docs/SRS.md](docs/SRS.md) | System requirements, module interfaces |
 | [docs/HLD.md](docs/HLD.md) | High-level architecture and design decisions |
 | [docs/LLD.md](docs/LLD.md) | Low-level module specifications and pseudocode |
 | [docs/ARCHITECTURE_DIAGRAMS.md](docs/ARCHITECTURE_DIAGRAMS.md) | Mermaid architecture + flowchart diagrams |
 | [docs/ARCHITECTURE_TRACEABILITY.md](docs/ARCHITECTURE_TRACEABILITY.md) | PRD -> SRS -> HLD -> LLD traceability matrix |
-| [docs/PHASE1_RUNBOOK.md](docs/PHASE1_RUNBOOK.md) | Step-by-step runbook for Phase 1 MATLAB |
+| [docs/PHASE1_RUNBOOK.md](docs/PHASE1_RUNBOOK.md) | Legacy pointer (superseded by RUNBOOK_OPERATIONS) |
 | [docs/SPECTROGRAM_FEATURE.md](docs/SPECTROGRAM_FEATURE.md) | Spectrogram visualisation feature notes (MATLAB GUI) |
-| [docs/PLAN_IMPLEMENTATION.md](docs/PLAN_IMPLEMENTATION.md) | Overall implementation roadmap with current status |
+| [docs/PLAN_IMPLEMENTATION.md](docs/PLAN_IMPLEMENTATION.md) | Legacy pointer (superseded by ROADMAP + MODULES_STATUS) |
 | [docs/PLAN_PC_RT_PYTHON.md](docs/PLAN_PC_RT_PYTHON.md) | Sprint-by-sprint plan for Python PC RT demo |
 | [docs/PHASE2_HANDOFF.md](docs/PHASE2_HANDOFF.md) | Phase 2 handoff notes: NumPy->C mapping, time budgets, parity targets |

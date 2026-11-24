@@ -120,7 +120,8 @@ def main():
     if args.gui:
         from ecnr_python.gui.rt_viz import RtViz
         viz = RtViz(cfg, record_path=args.record_path,
-                    bypass_callback=engine.set_bypass)
+                    bypass_callback=engine.set_bypass,
+                    engine=engine)
         engine.set_viz(viz)
 
     rt = RtAudio(
@@ -129,6 +130,9 @@ def main():
         input_device=_parse_device(args.input_device),
         output_device=_parse_device(args.output_device),
     )
+
+    if viz is not None:
+        viz.set_rt_audio(rt)
 
     rt.start()
     try:

@@ -26,7 +26,7 @@ class EcnrEngine:
         self._bypass = False      # when True: passthrough, no DSP
 
         # Sprint 3: Beamformer
-        if config.beamformer.enabled and config.beamformer.type == BfType.DAS and config.mic_count > 1:
+        if config.beamformer.type == BfType.DAS and config.mic_count > 1:
             self._bf = Beamformer(
                 config.beamformer, config.sampling_rate, config.frame_size, config.mic_count
             )
@@ -34,23 +34,21 @@ class EcnrEngine:
             self._bf = None
 
         # Sprint 2: AEC
-        if config.aec.enabled:
-            self._aec = AEC(config.aec, config.frame_size)
-            print(f"[engine] AEC enabled  "
-                  f"filter_length={config.aec.filter_length}  "
-                  f"step_size={config.aec.step_size}  "
-                  f"dtd_threshold={config.aec.double_talk_threshold_db} dB")
-        else:
-            self._aec = None
+        self._aec = AEC(config.aec, config.frame_size)
+        print(
+            f"[engine] AEC {'enabled' if config.aec.enabled else 'disabled'}  "
+            f"filter_length={config.aec.filter_length}  "
+            f"step_size={config.aec.step_size}  "
+            f"dtd_threshold={config.aec.double_talk_threshold_db} dB"
+        )
 
         # Sprint 1: Traditional NR
-        if config.nr.enabled and config.mode == EcnrMode.TRADITIONAL:
-            self._nr = NrTraditional(config.nr, config.frame_size, config.sampling_rate)
-            print(f"[engine] NrTraditional enabled  "
-                  f"agg={config.nr.aggressiveness_db:.0f} dB  "
-                  f"alpha={config.nr.noise_smooth_alpha:.2f}")
-        else:
-            self._nr = None
+        self._nr = NrTraditional(config.nr, config.frame_size, config.sampling_rate)
+        print(
+            f"[engine] NrTraditional {'enabled' if config.nr.enabled else 'disabled'}  "
+            f"agg={config.nr.aggressiveness_db:.0f} dB  "
+            f"alpha={config.nr.noise_smooth_alpha:.2f}"
+        )
 
     # ------------------------------------------------------------------ #
     # Public API                                                           #
@@ -117,6 +115,54 @@ class EcnrEngine:
         """Toggle full bypass (passthrough). Safe to call from any thread."""
         self._bypass = enabled
         print(f"[engine] bypass={'ON (passthrough)' if enabled else 'OFF (ECNR active)'}")
+
+    def set_beamformer_enabled(self, enabled: bool) -> None:
+        self.config.beamformer.enabled = bool(enabled)
+        if self._bf is not None:
+            self._bf.set_enabled(enabled)
+        print(f"[engine] beamformer={'ON' if enabled else 'OFF'}")
+
+    def set_beamformer_steering_angle_deg(self, steering_angle_deg: float) -> None:
+        self.config.beamformer.steering_angle_deg = float(steering_angle_deg)
+        if self._bf is not None:
+            self._bf.set_steering_angle_deg(steering_angle_deg, self.config.beamformer, self.config.sampling_rate)
+        print(f"[engine] beamformer steering={steering_angle_deg:.1f} deg")
+
+    def set_aec_enabled(self, enabled: bool) -> None:
+        self.config.aec.enabled = bool(enabled)
+        if self._aec is not None:
+            self._aec.set_enabled(enabled)
+        print(f"[engine] aec={'ON' if enabled else 'OFF'}")
+
+    def set_aec_step_size(self, step_size: float) -> None:
+        self.config.aec.step_size = float(step_size)
+        if self._aec is not None:
+            self._aec.set_step_size(step_size)
+        print(f"[engine] aec step_size={step_size:.4f}")
+
+    def set_aec_double_talk_threshold_db(self, threshold_db: float) -> None:
+        self.config.aec.double_talk_threshold_db = float(threshold_db)
+        if self._aec is not None:
+            self._aec.set_double_talk_threshold_db(threshold_db)
+        print(f"[engine] aec dtd_threshold={threshold_db:.1f} dB")
+
+    def set_nr_enabled(self, enabled: bool) -> None:
+        self.config.nr.enabled = bool(enabled)
+        if self._nr is not None:
+            self._nr.set_enabled(enabled)
+        print(f"[engine] nr={'ON' if enabled else 'OFF'}")
+
+    def set_nr_aggressiveness_db(self, aggressiveness_db: float) -> None:
+        self.config.nr.aggressiveness_db = float(aggressiveness_db)
+        if self._nr is not None:
+            self._nr.set_aggressiveness_db(aggressiveness_db)
+        print(f"[engine] nr aggressiveness={aggressiveness_db:.1f} dB")
+
+    def set_nr_noise_smooth_alpha(self, alpha: float) -> None:
+        self.config.nr.noise_smooth_alpha = float(alpha)
+        if self._nr is not None:
+            self._nr.set_noise_smooth_alpha(alpha)
+        print(f"[engine] nr noise_smooth_alpha={alpha:.3f}")
 
     def set_profile(self, enabled: bool) -> None:
         self._profile = enabled

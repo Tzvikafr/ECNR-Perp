@@ -4,12 +4,14 @@ Port of phase1_matlab/aec/aec_init.m + aec_process.m + dtd_compute.m.
 Algorithm: per-sample NLMS adaptive filter with frame-level double-talk detection.
 """
 import math
+import threading
 import numpy as np
 from ecnr_python.config.ecnr_config import AecConfig
 
 
 class AEC:
     def __init__(self, config: AecConfig, frame_size: int):
+        self._lock = threading.Lock()
         self._enabled = config.enabled
         self._step_size = config.step_size
         self._reg = config.regularization
@@ -29,6 +31,37 @@ class AEC:
         self.erle_inst_db: float = math.nan
         self.erle_window_db: float = math.nan
 
+    @property
+    def enabled(self) -> bool:
+        return self._enabled
+
+    def set_enabled(self, enabled: bool) -> None:
+        with self._lock:
+            self._enabled = bool(enabled)
+            if not self._enabled:
+                self._reset_state_locked()
+
+    def set_step_size(self, step_size: float) -> None:
+        with self._lock:
+            self._step_size = float(step_size)
+
+    def set_double_talk_threshold_db(self, threshold_db: float) -> None:
+        with self._lock:
+            self._dtd_threshold_lin = 10.0 ** (float(threshold_db) / 10.0)
+
+    def reset(self) -> None:
+        with self._lock:
+            self._reset_state_locked()
+
+    def _reset_state_locked(self) -> None:
+        self._w.fill(0.0)
+        self._x_hist.fill(0.0)
+        self._erle_hist.fill(np.nan)
+        self._erle_hist_idx = 0
+        self.dtd_active = False
+        self.erle_inst_db = math.nan
+        self.erle_window_db = math.nan
+
     def process(self, mic_frame: np.ndarray, ref_frame: np.ndarray) -> np.ndarray:
         """Apply NLMS AEC.
 
@@ -42,20 +75,23 @@ class AEC:
             self.erle_window_db = math.nan
             return mic_frame.copy()
 
+        with self._lock:
+            step = self._step_size
+            reg = self._reg
+            dtd_threshold_lin = self._dtd_threshold_lin
+
         mic = mic_frame.astype(np.float64)
         ref = ref_frame.astype(np.float64)
 
         # Frame-level DTD: mic power vs reference power
         p_ref = np.mean(ref ** 2) + 1e-12
-        self.dtd_active = bool((np.mean(mic ** 2) / p_ref) > self._dtd_threshold_lin)
+        self.dtd_active = bool((np.mean(mic ** 2) / p_ref) > dtd_threshold_lin)
         dtd = self.dtd_active
 
         N = len(mic)
         e = np.empty(N, dtype=np.float64)
         w = self._w
         x_hist = self._x_hist
-        step = self._step_size
-        reg = self._reg
 
         for n in range(N):
             # Shift history right (newest-first), insert current reference sample

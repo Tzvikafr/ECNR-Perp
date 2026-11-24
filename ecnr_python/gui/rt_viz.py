@@ -13,17 +13,19 @@ Requires: PyQt5, pyqtgraph, soundfile (all in requirements.txt Sprint 4).
 Falls back gracefully if imports fail.
 """
 import math
+import json
 import queue
 import time
 from collections import deque
+from pathlib import Path
 
 import numpy as np
 
 try:
     from PyQt5.QtCore import Qt, QTimer
     from PyQt5.QtWidgets import (
-        QApplication, QGroupBox, QHBoxLayout, QLabel,
-        QMainWindow, QPushButton, QVBoxLayout, QWidget,
+        QApplication, QCheckBox, QDoubleSpinBox, QFormLayout, QGroupBox,
+        QHBoxLayout, QLabel, QMainWindow, QPushButton, QSpinBox, QVBoxLayout, QWidget,
     )
     import pyqtgraph as pg
     _GUI_AVAILABLE = True
@@ -39,7 +41,7 @@ _FFT_SIZE = 512           # spectrogram FFT size
 
 class RtViz:
     def __init__(self, config: EcnrConfig, record_path: str = "ecnr_capture.wav",
-                 bypass_callback=None):
+                 bypass_callback=None, engine=None):
         """
         bypass_callback: callable(bool) — called with True/False when the
                          ECNR ON/OFF button is toggled. Wire to engine.set_bypass().
@@ -49,6 +51,9 @@ class RtViz:
         self._fs = config.frame_size
         self._record_path = record_path
         self._bypass_callback = bypass_callback
+        self._engine = engine
+        self._rt_audio = None
+        self._last_rtt_ms = None
         self._bypass_active = False
 
         self._queue: queue.Queue = queue.Queue(maxsize=512)
@@ -112,6 +117,10 @@ class RtViz:
         update_timer.timeout.connect(self._drain_queue)
         update_timer.start(100)  # ~100 ms ≈ 5 frames at 50 fps
 
+        latency_timer = QTimer()
+        latency_timer.timeout.connect(self._poll_latency)
+        latency_timer.start(200)
+
         self._start = time.perf_counter()
         self._duration = duration
         dur_timer = QTimer()
@@ -124,6 +133,9 @@ class RtViz:
     def stop(self) -> None:
         if self._app is not None:
             self._app.quit()
+
+    def set_rt_audio(self, rt_audio) -> None:
+        self._rt_audio = rt_audio
 
     # ------------------------------------------------------------------ #
     # Window construction                                                  #
@@ -168,6 +180,94 @@ class RtViz:
         )
         dtd_inner.addWidget(self._dtd_label)
         lv.addWidget(dtd_box)
+
+        # Module controls
+        ctrl_box = QGroupBox("Module Controls")
+        ctrl_form = QFormLayout(ctrl_box)
+
+        self._bf_enable = QCheckBox("Beamformer ON")
+        self._bf_enable.setChecked(self._config.beamformer.enabled)
+        self._bf_enable.toggled.connect(self._on_bf_toggle)
+        ctrl_form.addRow(self._bf_enable)
+
+        self._bf_angle = QDoubleSpinBox()
+        self._bf_angle.setRange(-90.0, 90.0)
+        self._bf_angle.setDecimals(1)
+        self._bf_angle.setSingleStep(5.0)
+        self._bf_angle.setValue(float(self._config.beamformer.steering_angle_deg))
+        self._bf_angle.valueChanged.connect(self._on_bf_angle_change)
+        ctrl_form.addRow("BF steer (deg)", self._bf_angle)
+
+        self._aec_enable = QCheckBox("AEC ON")
+        self._aec_enable.setChecked(self._config.aec.enabled)
+        self._aec_enable.toggled.connect(self._on_aec_toggle)
+        ctrl_form.addRow(self._aec_enable)
+
+        self._aec_step = QDoubleSpinBox()
+        self._aec_step.setRange(0.001, 1.0)
+        self._aec_step.setDecimals(3)
+        self._aec_step.setSingleStep(0.01)
+        self._aec_step.setValue(float(self._config.aec.step_size))
+        self._aec_step.valueChanged.connect(self._on_aec_step_change)
+        ctrl_form.addRow("AEC step", self._aec_step)
+
+        self._aec_dtd = QDoubleSpinBox()
+        self._aec_dtd.setRange(-20.0, 40.0)
+        self._aec_dtd.setDecimals(1)
+        self._aec_dtd.setSingleStep(1.0)
+        self._aec_dtd.setValue(float(self._config.aec.double_talk_threshold_db))
+        self._aec_dtd.valueChanged.connect(self._on_aec_dtd_change)
+        ctrl_form.addRow("AEC DTD (dB)", self._aec_dtd)
+
+        self._nr_enable = QCheckBox("NR ON")
+        self._nr_enable.setChecked(self._config.nr.enabled)
+        self._nr_enable.toggled.connect(self._on_nr_toggle)
+        ctrl_form.addRow(self._nr_enable)
+
+        self._nr_aggr = QDoubleSpinBox()
+        self._nr_aggr.setRange(0.0, 24.0)
+        self._nr_aggr.setDecimals(1)
+        self._nr_aggr.setSingleStep(1.0)
+        self._nr_aggr.setValue(float(self._config.nr.aggressiveness_db))
+        self._nr_aggr.valueChanged.connect(self._on_nr_aggr_change)
+        ctrl_form.addRow("NR aggressiveness", self._nr_aggr)
+
+        self._nr_alpha = QDoubleSpinBox()
+        self._nr_alpha.setRange(0.85, 0.99)
+        self._nr_alpha.setDecimals(3)
+        self._nr_alpha.setSingleStep(0.005)
+        self._nr_alpha.setValue(float(self._config.nr.noise_smooth_alpha))
+        self._nr_alpha.valueChanged.connect(self._on_nr_alpha_change)
+        ctrl_form.addRow("NR smooth alpha", self._nr_alpha)
+
+        lv.addWidget(ctrl_box)
+
+        # Latency controls
+        lat_box = QGroupBox("Latency")
+        lat_form = QFormLayout(lat_box)
+
+        self._lat_meas_btn = QPushButton("Measure RTT")
+        self._lat_meas_btn.clicked.connect(self._on_measure_latency)
+        lat_form.addRow(self._lat_meas_btn)
+
+        self._lat_label = QLabel("RTT: -- ms")
+        lat_form.addRow(self._lat_label)
+
+        self._delay_spin = QSpinBox()
+        self._delay_spin.setRange(0, 48000)
+        self._delay_spin.setSingleStep(16)
+        self._delay_spin.setValue(int(self._config.reference.delay_compensation_samples))
+        lat_form.addRow("Delay samples", self._delay_spin)
+
+        self._lat_store_btn = QPushButton("Store delay to config")
+        self._lat_store_btn.clicked.connect(self._on_store_delay)
+        lat_form.addRow(self._lat_store_btn)
+
+        self._lat_status = QLabel("")
+        self._lat_status.setWordWrap(True)
+        lat_form.addRow(self._lat_status)
+
+        lv.addWidget(lat_box)
 
         # Metric readouts
         metrics_box = QGroupBox("Metrics")
@@ -310,6 +410,27 @@ class RtViz:
     # Recording                                                            #
     # ------------------------------------------------------------------ #
 
+    def _poll_latency(self) -> None:
+        if self._rt_audio is None:
+            return
+        rtt = self._rt_audio.round_trip_ms()
+        if rtt is None:
+            return
+        if self._last_rtt_ms is not None and abs(rtt - self._last_rtt_ms) < 1e-3:
+            return
+        self._last_rtt_ms = rtt
+        self._lat_label.setText(f"RTT: {rtt:.1f} ms")
+        one_way_samples = int(round((rtt * 0.5 / 1000.0) * self._sr))
+        self._delay_spin.setValue(max(0, one_way_samples))
+        self._lat_status.setText("Suggested delay updated from latest RTT.")
+
+    def _call_engine(self, method_name: str, *args) -> None:
+        if self._engine is None:
+            return
+        method = getattr(self._engine, method_name, None)
+        if callable(method):
+            method(*args)
+
     def _on_bypass_toggle(self, checked: bool) -> None:
         self._bypass_active = checked
         if checked:
@@ -318,6 +439,69 @@ class RtViz:
             self._bypass_btn.setText("ECNR: ON")
         if self._bypass_callback is not None:
             self._bypass_callback(checked)
+
+    def _on_bf_toggle(self, checked: bool) -> None:
+        self._call_engine("set_beamformer_enabled", checked)
+
+    def _on_bf_angle_change(self, value: float) -> None:
+        self._call_engine("set_beamformer_steering_angle_deg", value)
+
+    def _on_aec_toggle(self, checked: bool) -> None:
+        self._call_engine("set_aec_enabled", checked)
+
+    def _on_aec_step_change(self, value: float) -> None:
+        self._call_engine("set_aec_step_size", value)
+
+    def _on_aec_dtd_change(self, value: float) -> None:
+        self._call_engine("set_aec_double_talk_threshold_db", value)
+
+    def _on_nr_toggle(self, checked: bool) -> None:
+        self._call_engine("set_nr_enabled", checked)
+
+    def _on_nr_aggr_change(self, value: float) -> None:
+        self._call_engine("set_nr_aggressiveness_db", value)
+
+    def _on_nr_alpha_change(self, value: float) -> None:
+        self._call_engine("set_nr_noise_smooth_alpha", value)
+
+    def _on_measure_latency(self) -> None:
+        if self._rt_audio is None:
+            self._lat_status.setText("Latency unavailable: RT audio stream not attached.")
+            return
+        self._last_rtt_ms = None
+        self._lat_label.setText("RTT: measuring...")
+        self._lat_status.setText("Click injected. Keep speaker loopback path active.")
+        self._rt_audio.measure_latency()
+
+    def _on_store_delay(self) -> None:
+        cfg_path = getattr(self._config, "runtime_config_path", "")
+        if not cfg_path:
+            self._lat_status.setText("No runtime config path available.")
+            return
+
+        try:
+            p = Path(cfg_path)
+            with open(p, "r", encoding="utf-8") as f:
+                j = json.load(f)
+
+            if "reference" not in j or not isinstance(j["reference"], dict):
+                j["reference"] = {}
+
+            delay_samples = int(self._delay_spin.value())
+            j["reference"]["delay_compensation_samples"] = delay_samples
+
+            with open(p, "w", encoding="utf-8") as f:
+                json.dump(j, f, indent=2)
+                f.write("\n")
+
+            self._config.reference.delay_compensation_samples = delay_samples
+            self._lat_status.setText(
+                f"Saved delay_compensation_samples={delay_samples} to {p.name}"
+            )
+            print(f"[viz] Saved reference.delay_compensation_samples={delay_samples} to {p}")
+        except Exception as exc:
+            self._lat_status.setText(f"Save failed: {exc}")
+            print(f"[viz] Save delay failed: {exc}")
 
     def _on_record_toggle(self, checked: bool) -> None:
         self._recording = checked

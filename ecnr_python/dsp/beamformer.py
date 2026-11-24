@@ -4,6 +4,7 @@ Port of LLD-3 (bf_compute_delays + bf_process).
 Adds fractional-delay accuracy on top of the MATLAB equal-weight DAS baseline.
 """
 import math
+import threading
 import numpy as np
 from ecnr_python.config.ecnr_config import BfConfig, ArrayGeo, BfType
 
@@ -24,6 +25,7 @@ def _lagrange_coeffs(frac: float, n_taps: int = _FIR_TAPS) -> np.ndarray:
 
 class Beamformer:
     def __init__(self, config: BfConfig, sampling_rate: int, frame_size: int, mic_count: int):
+        self._lock = threading.Lock()
         M = mic_count
         self._enabled = config.enabled and M > 1
         self._M = M
@@ -43,6 +45,26 @@ class Beamformer:
             print(f"[bf] DAS  mics={M}  spacing={config.spacing_m*100:.1f} cm  "
                   f"steer={config.steering_angle_deg:.1f} deg  "
                   f"latency<={self.latency_ms:.2f} ms")
+
+    @property
+    def enabled(self) -> bool:
+        return self._enabled
+
+    def set_enabled(self, enabled: bool) -> None:
+        with self._lock:
+            self._enabled = bool(enabled) and self._M > 1
+            if self._enabled:
+                self._delay_lines.fill(0.0)
+
+    def set_steering_angle_deg(self, steering_angle_deg: float, config: BfConfig, sr: int) -> None:
+        with self._lock:
+            config.steering_angle_deg = float(steering_angle_deg)
+            self._compute_delays(config, sr)
+            self._delay_lines.fill(0.0)
+
+    def reset(self) -> None:
+        with self._lock:
+            self._delay_lines.fill(0.0)
 
     def _compute_delays(self, config: BfConfig, sr: int) -> None:
         angle_rad = math.radians(config.steering_angle_deg)

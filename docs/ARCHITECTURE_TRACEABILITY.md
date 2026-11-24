@@ -87,3 +87,19 @@ At the time of this revision, the main architecture decisions are resolved well 
 - exact DSP IPC/runtime stack details within the TI-supported integration space
 
 These should be handled as implementation-stage feasibility and profiling tasks rather than as open architecture contradictions.
+
+---
+
+## 7. Document Authority Matrix
+
+| Topic | Canonical Owner | Supporting References |
+|---|---|---|
+| Product goals, NFRs, success metrics | `docs/PRD.md` | `docs/ACCEPTANCE_CRITERIA.md` |
+| Software behavior and interface contracts | `docs/SRS.md` | `docs/LLD.md` |
+| Architecture decisions and deployment strategy | `docs/HLD.md` | This traceability document |
+| Detailed module implementation logic | `docs/LLD.md` | `docs/SRS.md` |
+| Run commands and operational workflow | `docs/RUNBOOK_OPERATIONS.md` | `README.md` |
+| Program phase sequencing | `docs/ROADMAP.md` | `docs/TASK_STATUS.md` |
+| Module implementation status by phase | `docs/MODULES_STATUS.md` | `docs/TASK_STATUS.md` |
+| Integration snapshots and verification evidence | `docs/TASK_STATUS.md` | `docs/RUNBOOK_OPERATIONS.md` |
+| Phase 2 C-port guidance and measured timing context | `docs/PHASE2_HANDOFF.md` | `docs/ACCEPTANCE_CRITERIA.md` |

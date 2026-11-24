@@ -80,6 +80,8 @@ class EcnrConfig:
     aec: AecConfig = field(default_factory=AecConfig)
     nr: NrConfig = field(default_factory=NrConfig)
     dl: DlConfig = field(default_factory=DlConfig)
+    runtime_config_path: str = ""
+    runtime_scenario_path: str = ""
 
 
 def _clamp(value, lo, hi, name):
@@ -103,6 +105,7 @@ def load_config(config_path: str, base_dir: str = ".") -> EcnrConfig:
         j = json.load(f)
 
     cfg = EcnrConfig()
+    cfg.runtime_config_path = str(path.resolve())
     cfg.schema_version = j.get("schema_version", cfg.schema_version)
 
     cfg.sampling_rate = j.get("sample_rate_hz", cfg.sampling_rate)
@@ -200,6 +203,7 @@ def load_scenario_config(scenario_path: str) -> EcnrConfig:
 
     config_rel = scenario.get("config")
     cfg = load_config(config_rel, base_dir=str(base_dir)) if config_rel else EcnrConfig()
+    cfg.runtime_scenario_path = str(scenario_path.resolve())
 
     # Resolve reference WAV path from scenario into cfg so ReferenceSource can open it
     ref_wav = scenario.get("ref_wav")

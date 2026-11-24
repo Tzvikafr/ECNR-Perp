@@ -5,11 +5,13 @@ Algorithm: two 50%-OLA segments per frame, periodic Hann window, zero-pad FFT,
 per-bin Wiener gain, overlap-add reconstruction.
 """
 import numpy as np
+import threading
 from ecnr_python.config.ecnr_config import NrConfig
 
 
 class NrTraditional:
     def __init__(self, config: NrConfig, frame_size: int, sampling_rate: int):
+        self._lock = threading.Lock()
         if frame_size % 2 != 0:
             raise ValueError("frame_size must be even for 50% OLA NR")
 
@@ -42,10 +44,44 @@ class NrTraditional:
         self.snr_in_db: float = 0.0
         self.snr_out_db: float = 0.0
 
+    @property
+    def enabled(self) -> bool:
+        return self._enabled
+
+    def set_enabled(self, enabled: bool) -> None:
+        with self._lock:
+            self._enabled = bool(enabled)
+            if not self._enabled:
+                self._reset_state_locked()
+
+    def set_aggressiveness_db(self, aggressiveness_db: float) -> None:
+        with self._lock:
+            self._lambda = 1.0 + (float(aggressiveness_db) / 24.0) * 1.5
+
+    def set_noise_smooth_alpha(self, alpha: float) -> None:
+        with self._lock:
+            self._alpha = float(alpha)
+
+    def reset(self) -> None:
+        with self._lock:
+            self._reset_state_locked()
+
+    def _reset_state_locked(self) -> None:
+        self._noise_psd = None
+        self._prev_in.fill(0.0)
+        self._ola_buf.fill(0.0)
+        self.snr_in_db = 0.0
+        self.snr_out_db = 0.0
+
     def process(self, frame: np.ndarray) -> np.ndarray:
         """Apply Wiener NR.  frame: (frame_size,) → (frame_size,)."""
         if not self._enabled:
             return frame.copy()
+
+        with self._lock:
+            alpha = self._alpha
+            floor_lin = self._floor_lin
+            lambda_ = self._lambda
 
         N, Nf, hop = self._N, self._Nf, self._hop
         e = frame.astype(np.float64)
@@ -69,12 +105,12 @@ class NrTraditional:
             # Noise PSD update: IIR, gated when frame looks noise-like
             # (instantaneous power within 10 dB of current estimate)
             if np.mean(P) < 10.0 * (np.mean(self._noise_psd) + 1e-12):
-                self._noise_psd[:] = (self._alpha * self._noise_psd
-                                      + (1.0 - self._alpha) * P)
+                self._noise_psd[:] = (alpha * self._noise_psd
+                                      + (1.0 - alpha) * P)
 
             # Per-bin Wiener gain: G[k] = max(floor, 1 - lambda / (SNR_post[k] + 1))
             snr_post = P / (self._noise_psd + 1e-12)
-            G = np.maximum(self._floor_lin, 1.0 - self._lambda / (snr_post + 1.0))
+            G = np.maximum(floor_lin, 1.0 - lambda_ / (snr_post + 1.0))
 
             # Synthesis: apply gain, IFFT, take first N samples
             y_seg = np.fft.irfft(G * X, n=Nf)[:N]
